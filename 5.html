@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>互動骰子遊戲</title>
+    <style>
+        :root {
+            --dice-color: #ffffff;
+            --dot-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        h1 { margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+
+        /* 骰子容器 */
+        .dice-container {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        /* 骰子本體 */
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: var(--dice-color);
+            border-radius: 15px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.6s ease-out;
+        }
+
+        /* 骰子點點 */
+        .dot {
+            width: 20px;
+            height: 20px;
+            background-color: var(--dot-color);
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            visibility: hidden; /* 預設隱藏 */
+        }
+
+        /* 按鈕與文字 */
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background-color: #ff4b2b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: #ff416c; transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        /* 骰子點數佈局 */
+        .dice[data-value="1"] .dot:nth-child(5) { visibility: visible; }
+        .dice[data-value="2"] .dot:nth-child(1), .dice[data-value="2"] .dot:nth-child(9) { visibility: visible; }
+        .dice[data-value="3"] .dot:nth-child(1), .dice[data-value="3"] .dot:nth-child(5), .dice[data-value="3"] .dot:nth-child(9) { visibility: visible; }
+        .dice[data-value="4"] .dot:nth-child(1), .dice[data-value="4"] .dot:nth-child(3), .dice[data-value="4"] .dot:nth-child(7), .dice[data-value="4"] .dot:nth-child(9) { visibility: visible; }
+        .dice[data-value="5"] .dot:nth-child(1), .dice[data-value="5"] .dot:nth-child(3), .dice[data-value="5"] .dot:nth-child(5), .dice[data-value="5"] .dot:nth-child(7), .dice[data-value="5"] .dot:nth-child(9) { visibility: visible; }
+        .dice[data-value="6"] .dot:nth-child(1), .dice[data-value="6"] .dot:nth-child(3), .dice[data-value="6"] .dot:nth-child(4), .dice[data-value="6"] .dot:nth-child(6), .dice[data-value="6"] .dot:nth-child(7), .dice[data-value="6"] .dot:nth-child(9) { visibility: visible; }
+
+        /* 動畫效果 */
+        .rolling { animation: shake 0.5s infinite; }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg) scale(1.1); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎲 幸運骰子遊戲</h1>
+
+    <div class="dice-container">
+        <div class="dice" id="dice1" data-value="1">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <div class="dice" id="dice2" data-value="1">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
+
+    <button onclick="rollDice()">擲骰子！</button>
+    <p id="result">點擊按鈕開始遊戲</p>
+
+    <script>
+        function rollDice() {
+            const dice1 = document.getElementById('dice1');
+            const dice2 = document.getElementById('dice2');
+            const resultText = document.getElementById('result');
+            const btn = document.querySelector('button');
+
+            // 停用按鈕防止重複點擊
+            btn.disabled = true;
+            resultText.innerText = "正在擲骰子...";
+
+            // 加入動畫 class
+            dice1.classList.add('rolling');
+            dice2.classList.add('rolling');
+
+            setTimeout(() => {
+                // 產生 1 到 6 的隨機數
+                const val1 = Math.floor(Math.random() * 6) + 1;
+                const val2 = Math.floor(Math.random() * 6) + 1;
+
+                // 更新骰子數值 (觸發 CSS 顯示對應點點)
+                dice1.setAttribute('data-value', val1);
+                dice2.setAttribute('data-value', val2);
+
+                // 移除動畫
+                dice1.classList.remove('rolling');
+                dice2.classList.remove('rolling');
+
+                // 判斷結果
+                const total = val1 + val2;
+                let message = `總共是 ${total} 點！`;
+                
+                if (val1 === val2) {
+                    message += " 🎊 豹子（雙倍好運）！";
+                } else if (total >= 10) {
+                    message += " 🔥 運氣不錯喔！";
+                }
+
+                resultText.innerText = message;
+                btn.disabled = false;
+            }, 600); // 動畫持續 0.6 秒
+        }
+    </script>
+</body>
+</html>
